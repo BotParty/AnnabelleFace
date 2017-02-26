@@ -51,12 +51,12 @@ public class SpeechControllerImpl implements SpeechController {
 
     @Override
     public void setPitch(float pitch) {
-
+        textToSpeech.setPitch(pitch);
     }
 
     @Override
     public void setSpeechRate(float speechRate) {
-
+        textToSpeech.setSpeechRate(speechRate);
     }
 
     @Override

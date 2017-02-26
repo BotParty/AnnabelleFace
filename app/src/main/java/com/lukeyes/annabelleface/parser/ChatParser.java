@@ -106,6 +106,9 @@ public class ChatParser {
                         context.binary().parm(1).getText(),
                         context.binary().parm(2).getText()};
             }
+            for(int i=0;i<parms.length;i++) {
+                parms[0] = parms[0].replaceAll("^\"|\"$", "");
+            }
             return _generator.generate(verb.replace("\\",""),parms);
         }
 
