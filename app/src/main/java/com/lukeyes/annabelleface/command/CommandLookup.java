@@ -1,8 +1,13 @@
 package com.lukeyes.annabelleface.command;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.reflections.Reflections;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Created by brandon on 2/20/2017.
@@ -11,11 +16,37 @@ import java.util.HashMap;
 
 public class CommandLookup implements CommandReference {
 
-    private HashMap<String,Class> lookup = new HashMap<>();
+ //  private HashMap<String,Class> lookup = new HashMap<>();
 
-    public CommandLookup() {
-        Reflections ref = new Reflections();
-        for (Class clazz : ref.getSubTypesOf(ChatCommandBase.class)) {
+    private HashMap<String,ChatCommand> lookup = new HashMap<>();
+    // TODO THIS IS TEMPORARY UNTIL I UNDERSTAND DAGGER ENOUGH TO IMPLEMENT A FACTORY
+    // Reflections DOES NOT WORK with android, god I hate java. Other option is to use
+    // annotation processors, but for now just registering types.
+    @Inject
+    public CommandLookup(
+            FaceCommand face,
+            PauseCommand pause,
+            PitchCommand pitch,
+            SayCommand say
+    ) {
+        lookup.put("face", face);
+        lookup.put("pause", pause);
+        lookup.put("pitch", pitch);
+        lookup.put("say", say);
+
+    }
+
+    public Class getCommand(String key) {
+        throw new NotImplementedException("not working");
+    }
+
+    public ChatCommand getCommandObject(String key) {
+        return lookup.get(key);
+    }
+/*
+      //  Reflections reflections = new Reflections("com.lukeyes.annabelleface.command");
+         //for (Class clazz : reflections.getTypesAnnotatedWith(Command.class)) {
+        for (Class clazz : getCommands()) {
             String commandName = "";
             Command annotation = ChatCommandBase.getCommandAnnotation(clazz);
             if (annotation != null) {
@@ -25,6 +56,17 @@ public class CommandLookup implements CommandReference {
             }
             lookup.put(commandName,clazz);
         }
+
+
+
+    //for the moment, new commands need to be registered here
+    private static Class[] getCommands() {
+        return new Class[]{
+                FaceCommand.class,
+                PauseCommand.class,
+                SayCommand.class,
+                PitchCommand.class
+        };
     }
 
     @Override
@@ -32,6 +74,7 @@ public class CommandLookup implements CommandReference {
         if (lookup.containsKey(cmd)) return lookup.get(cmd);
         return null;
     }
+*/
 
 
 }

@@ -144,9 +144,12 @@ public class FullscreenActivity extends BaseActivity {
 
         WebSettings webSettings = mContentView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        //TODO - make this better
 
-        viewController.setUri(getProperty("normal.faceURI",context));
+        //set the initial face state, if configured
+        String faceUri = getProperty("normal.faceURI", this);
+        if (faceUri != null && !faceUri.equals("")) {
+            viewController.setUri(faceUri);
+        }
 
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnTouchListener(new View.OnTouchListener() {
@@ -312,6 +315,7 @@ public class FullscreenActivity extends BaseActivity {
 
             @Override
             public void onError(Exception ex) {
+
                 Log.i("Websocket", "Error " + ex.getMessage());
             }
         };
