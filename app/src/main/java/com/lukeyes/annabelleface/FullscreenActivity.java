@@ -5,23 +5,35 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.speech.tts.TextToSpeech;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.Toast;
+
+import static com.lukeyes.annabelleface.util.Helpers.*;
+
+import com.lukeyes.annabelleface.api.ViewController;
+import com.lukeyes.annabelleface.api.ViewControllerImpl;
+import com.lukeyes.annabelleface.command.ChatCommand;
+import com.lukeyes.annabelleface.parser.ChatParser;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Locale;
 
-public class FullscreenActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
+import javax.inject.Inject;
+
+
+public class FullscreenActivity extends BaseActivity {
+\
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -40,7 +52,7 @@ public class FullscreenActivity extends AppCompatActivity implements TextToSpeec
      */
     private static final int UI_ANIMATION_DELAY = 300;
     private final Handler mHideHandler = new Handler();
-    private View mContentView;
+    private WebView mContentView;
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
         @Override
@@ -73,10 +85,14 @@ public class FullscreenActivity extends AppCompatActivity implements TextToSpeec
     private boolean mVisible;
     public Button connectButton;
     public Button disconnectButton;
-    TextToSpeech textToSpeech;
-    Context context;
 
-    private static final String AUTO_ADDRESS = "192.168.1.2";
+    Context context;
+    @Inject
+    ChatParser chatParser;
+    @Inject
+    ViewController viewController;
+
+    private static final String AUTO_ADDRESS = "192.168.2.96"; //"192.168.1.2";
 
 
     private final Runnable mHideRunnable = new Runnable() {
@@ -107,9 +123,10 @@ public class FullscreenActivity extends AppCompatActivity implements TextToSpeec
         setContentView(R.layout.activity_fullscreen);
         this.context = this;
 
-        mVisible = true;
+
         mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = findViewById(R.id.fullscreen_content);
+        mContentView = (WebView) findViewById(R.id.webview);
+        mVisible = true;
 
         connectButton = (Button) findViewById(R.id.button_connect);
         connectButton.setOnClickListener(new View.OnClickListener() {
@@ -121,11 +138,18 @@ public class FullscreenActivity extends AppCompatActivity implements TextToSpeec
         connectButton.setOnTouchListener(mDelayHideTouchListener);
         connectButton.setEnabled(true);
 
+        WebSettings webSettings = mContentView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        //TODO - make this better
+        ((ViewControllerImpl) viewController).setWebView(mContentView);
+
+
         // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
+        mContentView.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View view) {
+            public boolean onTouch(View view, MotionEvent ev) {
                 toggle();
+                return false;
             }
         });
 
@@ -142,7 +166,7 @@ public class FullscreenActivity extends AppCompatActivity implements TextToSpeec
         });
         disconnectButton.setEnabled(false);
 
-        textToSpeech = new TextToSpeech(this, this);
+        ((AnnabelleApp) getApplication()).inject(this);
     }
 
     @Override
@@ -200,45 +224,18 @@ public class FullscreenActivity extends AppCompatActivity implements TextToSpeec
 
 
     @Override
-    public void onInit(int status) {
-// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
-        if (status == TextToSpeech.SUCCESS) {
-            // Set preferred language to US english.
-            // Note that a language may not be available, and the result will indicate this.
-            int result = textToSpeech.setLanguage(Locale.US);
-            // Try this someday for some interesting results.
-            // int result mTts.setLanguage(Locale.FRANCE);
-            if (result == TextToSpeech.LANG_MISSING_DATA ||
-                    result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                // Lanuage data is missing or the language is not supported.
-                Log.d("TTS","Language is not available.");
-            } else {
-                // Check the documentation for other possible result codes.
-                // For example, the language may be available for the locale,
-                // but not for the specified country and variant.
-
-                // The TTS engine has been successfully initialized.
-
-            }
-        } else {
-            // Initialization failed.
-            Log.e("TTS", "Could not initialize TextToSpeech.");
-        }
-    }
-
-    @Override
     public void onDestroy() {
-        // Don't forget to shutdown!
-        if (textToSpeech != null) {
-            textToSpeech.stop();
-            textToSpeech.shutdown();
-        }
-
         super.onDestroy();
     }
 
     public void onConnect() {
-        connectWebSocket(AUTO_ADDRESS);
+        try {
+            connectWebSocket(getProperty("default.host", context),
+                    getProperty("default.port",context));
+        }
+        catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     public void onDisconnect() {
@@ -254,13 +251,17 @@ public class FullscreenActivity extends AppCompatActivity implements TextToSpeec
 
     public void displayString(String message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-        textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null);
+        try {
+            for (ChatCommand command : chatParser.parse(message)) {
+                command.execute();
+            }
+        } catch (Throwable ex) {}
     }
 
-    private void connectWebSocket(String address) {
+    private void connectWebSocket(String address, String port) {
         URI uri;
         try {
-            String socketAddress = String.format("ws://%s:8080", address);
+            String socketAddress = String.format("ws://%s:%s", address, port);
             String toastText = String.format("Connecting to %s", socketAddress);
             Toast.makeText(this,toastText,Toast.LENGTH_SHORT).show();
             uri = new URI(socketAddress);
@@ -273,6 +274,7 @@ public class FullscreenActivity extends AppCompatActivity implements TextToSpeec
             @Override
             public void onOpen(ServerHandshake handshakedata) {
                 runOnUiThread(new Runnable() {
+                    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
                     @Override
                     public void run() {
                         connectButton.setEnabled(false);
@@ -288,6 +290,7 @@ public class FullscreenActivity extends AppCompatActivity implements TextToSpeec
             public void onMessage(final String message) {
                 Log.i("Websocket", message);
                 runOnUiThread(new Runnable() {
+                    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
                     @Override
                     public void run() {
                         displayString(message);
