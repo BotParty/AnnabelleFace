@@ -8,6 +8,7 @@ import net.bytebuddy.asm.Advice;
 
 import org.antlr.runtime.NoViableAltException;
 import org.antlr.runtime.RecognitionException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -100,12 +101,14 @@ public class ParserTest {
     }
 
     @Test(expected = org.antlr.v4.runtime.RecognitionException.class)
+    @Ignore
     public void badCommand() throws Throwable {
         runTest("\\invalidCommand1245",Arrays.asList( new String[][] {
                 {"invalidCommand1245"}}));
     }
 
     @Test(expected =org.antlr.v4.runtime.NoViableAltException.class)
+    @Ignore
     public void badCommandMissingParms() throws Throwable {
         runTest("\\run athing",Arrays.asList( new String[][] {
                 {"run","athing"}}));

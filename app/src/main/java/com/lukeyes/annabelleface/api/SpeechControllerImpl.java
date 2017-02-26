@@ -17,7 +17,7 @@ import java.util.UUID;
 public class SpeechControllerImpl implements SpeechController {
 
 
-    TextToSpeech textToSpeech;
+    private TextToSpeech textToSpeech;
 
     public SpeechControllerImpl(Context context ) {
         textToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {

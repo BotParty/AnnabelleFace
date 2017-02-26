@@ -4,7 +4,7 @@ chat: (item)*;
 item: (textblock | expr);
 expr: (nullary|unary|binary|ternary);
 
-parm: (STRING| '"'(STRING)+ '"');
+parm: (STRING| QUOTED);
 nullary: NULLCMD;
 unary: UNCMD parm;
 binary: BINCMD parm parm;
@@ -17,10 +17,12 @@ phoneme: STRING;
 ignored: UNKNOWN+;
 
 NULLCMD: (CMDPFX ('scream'|'noop'));
-UNCMD: (CMDPFX ('pitch'|'noop1ary'|'pause'|'face'|'say'));
+UNCMD: (CMDPFX ('pitch'|'noop1ary'|'pause'|'face'|'say'|'view'));
 BINCMD: (CMDPFX ('run'|'noop2ary'));
 TERNCMD: (CMDPFX 'noop3ary');
 
+
+QUOTED: '"' ~'"'* '"';
 CMDPFX: '\\';
 STRING: (ALPHANUM+);
 ALPHANUM: [a-zA-Z0-9];

@@ -12,6 +12,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Perform injection so that when this call returns all dependencies will be available for use.
-        ((AnnabelleApp) getApplication()).inject(this);
+     //   ((AnnabelleApp) getApplication()).inject(this);
     }
 }

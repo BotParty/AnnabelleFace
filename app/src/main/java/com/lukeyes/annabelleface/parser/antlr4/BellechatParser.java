@@ -17,8 +17,8 @@ public class BellechatParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, NULLCMD=2, UNCMD=3, BINCMD=4, TERNCMD=5, CMDPFX=6, STRING=7, ALPHANUM=8, 
-		WS=9, UNKNOWN=10;
+		NULLCMD=1, UNCMD=2, BINCMD=3, TERNCMD=4, QUOTED=5, CMDPFX=6, STRING=7, 
+		ALPHANUM=8, WS=9, UNKNOWN=10;
 	public static final int
 		RULE_chat = 0, RULE_item = 1, RULE_expr = 2, RULE_parm = 3, RULE_nullary = 4, 
 		RULE_unary = 5, RULE_binary = 6, RULE_ternary = 7, RULE_textblock = 8, 
@@ -29,10 +29,10 @@ public class BellechatParser extends Parser {
 	};
 
 	private static final String[] _LITERAL_NAMES = {
-		null, "'\"'", null, null, null, null, "'\\'"
+		null, null, null, null, null, null, "'\\'"
 	};
 	private static final String[] _SYMBOLIC_NAMES = {
-		null, null, "NULLCMD", "UNCMD", "BINCMD", "TERNCMD", "CMDPFX", "STRING", 
+		null, "NULLCMD", "UNCMD", "BINCMD", "TERNCMD", "QUOTED", "CMDPFX", "STRING", 
 		"ALPHANUM", "WS", "UNKNOWN"
 	};
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
@@ -292,10 +292,8 @@ public class BellechatParser extends Parser {
 	}
 
 	public static class ParmContext extends ParserRuleContext {
-		public List<TerminalNode> STRING() { return getTokens(BellechatParser.STRING); }
-		public TerminalNode STRING(int i) {
-			return getToken(BellechatParser.STRING, i);
-		}
+		public TerminalNode STRING() { return getToken(BellechatParser.STRING, 0); }
+		public TerminalNode QUOTED() { return getToken(BellechatParser.QUOTED, 0); }
 		public ParmContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -322,39 +320,15 @@ public class BellechatParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(46);
-			_errHandler.sync(this);
-			switch (_input.LA(1)) {
-			case STRING:
-				{
-				setState(38);
-				match(STRING);
-				}
-				break;
-			case T__0:
-				{
-				setState(39);
-				match(T__0);
-				setState(41); 
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-				do {
-					{
-					{
-					setState(40);
-					match(STRING);
-					}
-					}
-					setState(43); 
-					_errHandler.sync(this);
-					_la = _input.LA(1);
-				} while ( _la==STRING );
-				setState(45);
-				match(T__0);
-				}
-				break;
-			default:
-				throw new NoViableAltException(this);
+			setState(38);
+			_la = _input.LA(1);
+			if ( !(_la==QUOTED || _la==STRING) ) {
+			_errHandler.recoverInline(this);
+			}
+			else {
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
+				consume();
 			}
 			}
 		}
@@ -396,7 +370,7 @@ public class BellechatParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(48);
+			setState(40);
 			match(NULLCMD);
 			}
 		}
@@ -441,9 +415,9 @@ public class BellechatParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(50);
+			setState(42);
 			match(UNCMD);
-			setState(51);
+			setState(43);
 			parm();
 			}
 		}
@@ -491,11 +465,11 @@ public class BellechatParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(53);
+			setState(45);
 			match(BINCMD);
-			setState(54);
+			setState(46);
 			parm();
-			setState(55);
+			setState(47);
 			parm();
 			}
 		}
@@ -543,13 +517,13 @@ public class BellechatParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(57);
+			setState(49);
 			match(TERNCMD);
-			setState(58);
+			setState(50);
 			parm();
-			setState(59);
+			setState(51);
 			parm();
-			setState(60);
+			setState(52);
 			parm();
 			}
 		}
@@ -597,7 +571,7 @@ public class BellechatParser extends Parser {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(63); 
+			setState(55); 
 			_errHandler.sync(this);
 			_alt = 1;
 			do {
@@ -605,7 +579,7 @@ public class BellechatParser extends Parser {
 				case 1:
 					{
 					{
-					setState(62);
+					setState(54);
 					phoneme();
 					}
 					}
@@ -613,9 +587,9 @@ public class BellechatParser extends Parser {
 				default:
 					throw new NoViableAltException(this);
 				}
-				setState(65); 
+				setState(57); 
 				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,5,_ctx);
+				_alt = getInterpreter().adaptivePredict(_input,3,_ctx);
 			} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );
 			}
 		}
@@ -657,7 +631,7 @@ public class BellechatParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(67);
+			setState(59);
 			match(STRING);
 			}
 		}
@@ -703,17 +677,17 @@ public class BellechatParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(70); 
+			setState(62); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
 				{
 				{
-				setState(69);
+				setState(61);
 				match(UNKNOWN);
 				}
 				}
-				setState(72); 
+				setState(64); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			} while ( _la==UNKNOWN );
@@ -731,25 +705,23 @@ public class BellechatParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\fM\4\2\t\2\4\3\t"+
+		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\fE\4\2\t\2\4\3\t"+
 		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4"+
 		"\f\t\f\3\2\7\2\32\n\2\f\2\16\2\35\13\2\3\3\3\3\5\3!\n\3\3\4\3\4\3\4\3"+
-		"\4\5\4\'\n\4\3\5\3\5\3\5\6\5,\n\5\r\5\16\5-\3\5\5\5\61\n\5\3\6\3\6\3\7"+
-		"\3\7\3\7\3\b\3\b\3\b\3\b\3\t\3\t\3\t\3\t\3\t\3\n\6\nB\n\n\r\n\16\nC\3"+
-		"\13\3\13\3\f\6\fI\n\f\r\f\16\fJ\3\f\2\2\r\2\4\6\b\n\f\16\20\22\24\26\2"+
-		"\2J\2\33\3\2\2\2\4 \3\2\2\2\6&\3\2\2\2\b\60\3\2\2\2\n\62\3\2\2\2\f\64"+
-		"\3\2\2\2\16\67\3\2\2\2\20;\3\2\2\2\22A\3\2\2\2\24E\3\2\2\2\26H\3\2\2\2"+
-		"\30\32\5\4\3\2\31\30\3\2\2\2\32\35\3\2\2\2\33\31\3\2\2\2\33\34\3\2\2\2"+
-		"\34\3\3\2\2\2\35\33\3\2\2\2\36!\5\22\n\2\37!\5\6\4\2 \36\3\2\2\2 \37\3"+
-		"\2\2\2!\5\3\2\2\2\"\'\5\n\6\2#\'\5\f\7\2$\'\5\16\b\2%\'\5\20\t\2&\"\3"+
-		"\2\2\2&#\3\2\2\2&$\3\2\2\2&%\3\2\2\2\'\7\3\2\2\2(\61\7\t\2\2)+\7\3\2\2"+
-		"*,\7\t\2\2+*\3\2\2\2,-\3\2\2\2-+\3\2\2\2-.\3\2\2\2./\3\2\2\2/\61\7\3\2"+
-		"\2\60(\3\2\2\2\60)\3\2\2\2\61\t\3\2\2\2\62\63\7\4\2\2\63\13\3\2\2\2\64"+
-		"\65\7\5\2\2\65\66\5\b\5\2\66\r\3\2\2\2\678\7\6\2\289\5\b\5\29:\5\b\5\2"+
-		":\17\3\2\2\2;<\7\7\2\2<=\5\b\5\2=>\5\b\5\2>?\5\b\5\2?\21\3\2\2\2@B\5\24"+
-		"\13\2A@\3\2\2\2BC\3\2\2\2CA\3\2\2\2CD\3\2\2\2D\23\3\2\2\2EF\7\t\2\2F\25"+
-		"\3\2\2\2GI\7\f\2\2HG\3\2\2\2IJ\3\2\2\2JH\3\2\2\2JK\3\2\2\2K\27\3\2\2\2"+
-		"\t\33 &-\60CJ";
+		"\4\5\4\'\n\4\3\5\3\5\3\6\3\6\3\7\3\7\3\7\3\b\3\b\3\b\3\b\3\t\3\t\3\t\3"+
+		"\t\3\t\3\n\6\n:\n\n\r\n\16\n;\3\13\3\13\3\f\6\fA\n\f\r\f\16\fB\3\f\2\2"+
+		"\r\2\4\6\b\n\f\16\20\22\24\26\2\3\4\2\7\7\t\t@\2\33\3\2\2\2\4 \3\2\2\2"+
+		"\6&\3\2\2\2\b(\3\2\2\2\n*\3\2\2\2\f,\3\2\2\2\16/\3\2\2\2\20\63\3\2\2\2"+
+		"\229\3\2\2\2\24=\3\2\2\2\26@\3\2\2\2\30\32\5\4\3\2\31\30\3\2\2\2\32\35"+
+		"\3\2\2\2\33\31\3\2\2\2\33\34\3\2\2\2\34\3\3\2\2\2\35\33\3\2\2\2\36!\5"+
+		"\22\n\2\37!\5\6\4\2 \36\3\2\2\2 \37\3\2\2\2!\5\3\2\2\2\"\'\5\n\6\2#\'"+
+		"\5\f\7\2$\'\5\16\b\2%\'\5\20\t\2&\"\3\2\2\2&#\3\2\2\2&$\3\2\2\2&%\3\2"+
+		"\2\2\'\7\3\2\2\2()\t\2\2\2)\t\3\2\2\2*+\7\3\2\2+\13\3\2\2\2,-\7\4\2\2"+
+		"-.\5\b\5\2.\r\3\2\2\2/\60\7\5\2\2\60\61\5\b\5\2\61\62\5\b\5\2\62\17\3"+
+		"\2\2\2\63\64\7\6\2\2\64\65\5\b\5\2\65\66\5\b\5\2\66\67\5\b\5\2\67\21\3"+
+		"\2\2\28:\5\24\13\298\3\2\2\2:;\3\2\2\2;9\3\2\2\2;<\3\2\2\2<\23\3\2\2\2"+
+		"=>\7\t\2\2>\25\3\2\2\2?A\7\f\2\2@?\3\2\2\2AB\3\2\2\2B@\3\2\2\2BC\3\2\2"+
+		"\2C\27\3\2\2\2\7\33 &;B";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

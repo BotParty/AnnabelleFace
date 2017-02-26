@@ -19,12 +19,17 @@ public final class Helpers {
         return null;
     }
 
-    public static String getProperty(String key,Context context) throws IOException {
+    public static String getProperty(String key,Context context) {
         Properties properties = new Properties();
         AssetManager assetManager = context.getAssets();
-        InputStream inputStream = assetManager.open("app.properties");
-        properties.load(inputStream);
-        return properties.getProperty(key);
+        try {
+            InputStream inputStream = assetManager.open("app.properties");
+            properties.load(inputStream);
 
+            return properties.getProperty(key);
+        } catch (IOException ioex) {
+            ioex.printStackTrace();
+        }
+        return null;
     }
 }

@@ -13,7 +13,7 @@ public class CommandLookup implements CommandReference {
 
     private HashMap<String,Class> lookup = new HashMap<>();
 
-    protected CommandLookup() {
+    public CommandLookup() {
         Reflections ref = new Reflections();
         for (Class clazz : ref.getSubTypesOf(ChatCommandBase.class)) {
             String commandName = "";

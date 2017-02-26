@@ -9,7 +9,7 @@ public class PauseCommand extends ChatCommandBase {
 
     public void execute(String... parameters) {
         try {
-            int time = int.parseInt(parameters[0]);
+            int time = Integer.parseInt(parameters[0]);
             //putting this in to prevent oopsies
             if (time < 20000) {
                 wait(time);

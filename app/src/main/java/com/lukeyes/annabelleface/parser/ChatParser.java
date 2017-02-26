@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 
 /**
  * Created by brandon on 2/20/2017.
@@ -27,6 +29,7 @@ import java.util.List;
 
 public class ChatParser {
     private CommandGenerator _generator;
+    @Inject
     public ChatParser(CommandGenerator generator) {
         _generator = generator;
     }
@@ -90,7 +93,7 @@ public class ChatParser {
             }
             if (context.unary() != null) {
                 verb = context.unary().getChild(0).getText();
-                parms = new String[] {context.unary().parm().STRING(0).getText()};
+                parms = new String[] {context.unary().parm().getText()};
             }
             if (context.binary() != null) {
                 verb = context.binary().getChild(0).getText();

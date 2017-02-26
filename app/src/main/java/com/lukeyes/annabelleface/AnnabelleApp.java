@@ -2,32 +2,34 @@ package com.lukeyes.annabelleface;
 
 import android.app.Application;
 
+import com.lukeyes.annabelleface.command.CommandLookup;
+import com.lukeyes.annabelleface.command.CommandReference;
+
 import java.util.Arrays;
 import java.util.List;
 
-import dagger.ObjectGraph;
+import javax.inject.Singleton;
+
+import dagger.Provides;
+
 
 /**
  * Created by brandon on 2/25/2017.
  */
 
 public class AnnabelleApp extends Application {
-    private ObjectGraph graph;
+    //private ObjectGraph graph;
+    private AnnabelleComponent mAnnabelleComponent;
 
     @Override public void onCreate() {
         super.onCreate();
 
-        graph = ObjectGraph.create(getModules().toArray());
     }
 
-    protected List<Object> getModules() {
-        return Arrays.asList(
-                new AndroidModule(this),
-                new AnnabelleModule()
-        );
+
+    public AnnabelleComponent getAnnabelleComponent() {
+        return mAnnabelleComponent;
     }
 
-    public void inject(Object object) {
-        graph.inject(object);
-    }
+
 }

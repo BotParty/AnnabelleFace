@@ -25,7 +25,6 @@ import com.lukeyes.annabelleface.parser.ChatParser;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -33,7 +32,7 @@ import javax.inject.Inject;
 
 
 public class FullscreenActivity extends BaseActivity {
-\
+
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -87,12 +86,8 @@ public class FullscreenActivity extends BaseActivity {
     public Button disconnectButton;
 
     Context context;
-    @Inject
-    ChatParser chatParser;
-    @Inject
-    ViewController viewController;
-
-    private static final String AUTO_ADDRESS = "192.168.2.96"; //"192.168.1.2";
+    @Inject ChatParser chatParser;
+    @Inject ViewController viewController;
 
 
     private final Runnable mHideRunnable = new Runnable() {
@@ -116,9 +111,18 @@ public class FullscreenActivity extends BaseActivity {
         }
     };
 
+    private AnnabelleComponent mAnnabelleComponent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mAnnabelleComponent = DaggerAnnabelleComponent.builder()
+                .appModule(new AppModule(getApplication()))
+                .annabelleModule(new AnnabelleModule(this))
+                .build();
+
+        mAnnabelleComponent.inject(this);
 
         setContentView(R.layout.activity_fullscreen);
         this.context = this;
@@ -141,8 +145,8 @@ public class FullscreenActivity extends BaseActivity {
         WebSettings webSettings = mContentView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         //TODO - make this better
-        ((ViewControllerImpl) viewController).setWebView(mContentView);
 
+        viewController.setUri(getProperty("normal.faceURI",context));
 
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnTouchListener(new View.OnTouchListener() {
@@ -166,7 +170,7 @@ public class FullscreenActivity extends BaseActivity {
         });
         disconnectButton.setEnabled(false);
 
-        ((AnnabelleApp) getApplication()).inject(this);
+
     }
 
     @Override
@@ -229,13 +233,9 @@ public class FullscreenActivity extends BaseActivity {
     }
 
     public void onConnect() {
-        try {
-            connectWebSocket(getProperty("default.host", context),
-                    getProperty("default.port",context));
-        }
-        catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        connectWebSocket(getProperty("default.host", context),
+                getProperty("default.port",context));
+
     }
 
     public void onDisconnect() {
@@ -319,4 +319,7 @@ public class FullscreenActivity extends BaseActivity {
         mWebSocketClient.connect();
     }
 
+    public WebView getWebView() {
+        return mContentView;
+    }
 }

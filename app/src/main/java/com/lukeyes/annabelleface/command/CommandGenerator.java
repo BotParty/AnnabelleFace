@@ -4,6 +4,8 @@ package com.lukeyes.annabelleface.command;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
 
 /**
  * Created by brandon on 2/20/2017.
@@ -16,6 +18,7 @@ public class CommandGenerator {
 
     public CommandGenerator () {_lookup = new CommandLookup();}
 
+    @Inject
     public CommandGenerator (CommandReference lookup) {
         _lookup = lookup;
     }
