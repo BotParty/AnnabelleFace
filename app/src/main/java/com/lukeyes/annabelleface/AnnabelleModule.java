@@ -15,6 +15,7 @@ import com.lukeyes.annabelleface.command.CommandReference;
 import com.lukeyes.annabelleface.command.FaceCommand;
 import com.lukeyes.annabelleface.command.PauseCommand;
 import com.lukeyes.annabelleface.command.PitchCommand;
+import com.lukeyes.annabelleface.command.RateCommand;
 import com.lukeyes.annabelleface.command.SayCommand;
 
 import javax.inject.Inject;
@@ -50,8 +51,8 @@ public class AnnabelleModule {
     //TODO FIGURE OUT DAGGER  + FACTORIES
     @Provides
     @Singleton
-    public CommandLookup providesCommandLookup(FaceCommand face,  PitchCommand pitch, SayCommand say, PauseCommand pause) {
-        return new CommandLookup(face,pause,pitch,say);
+    public CommandLookup providesCommandLookup(FaceCommand face,  PitchCommand pitch, SayCommand say, PauseCommand pause, RateCommand rate) {
+        return new CommandLookup(face,pause,pitch,say,rate);
     }
 
     @Provides
@@ -69,6 +70,10 @@ public class AnnabelleModule {
     @Provides
     public PitchCommand providesPitchCommand(SpeechController sc) {
         return new PitchCommand(sc);
+    }
+    @Provides
+    public RateCommand providesRateCommand(SpeechController sc) {
+        return new RateCommand(sc);
     }
 
 

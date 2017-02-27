@@ -17,7 +17,8 @@ phoneme: STRING;
 ignored: UNKNOWN+;
 
 NULLCMD: (CMDPFX ('scream'|'noop'));
-UNCMD: (CMDPFX ('pitch'|'noop1ary'|'pause'|'face'|'say'|'view'));
+UNCMD: (CMDPFX ('pitch'|'noop1ary'|'pause'|'face'|'say'|'view'|'rate'));
+
 BINCMD: (CMDPFX ('run'|'noop2ary'));
 TERNCMD: (CMDPFX 'noop3ary');
 

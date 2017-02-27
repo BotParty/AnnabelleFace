@@ -12,7 +12,7 @@ public class PauseCommand extends ChatCommandBase {
             int time = Integer.parseInt(parameters[0]);
             //putting this in to prevent oopsies
             if (time < 20000) {
-                wait(time);
+                Thread.sleep(time);
             }
         }
         catch (Exception e){}

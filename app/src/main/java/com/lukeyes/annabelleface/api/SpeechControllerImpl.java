@@ -4,9 +4,11 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -18,6 +20,7 @@ public class SpeechControllerImpl implements SpeechController {
 
 
     private TextToSpeech textToSpeech;
+    private UtteranceProgressListener listener;
 
     public SpeechControllerImpl(Context context ) {
         textToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
@@ -41,12 +44,39 @@ public class SpeechControllerImpl implements SpeechController {
                         // The TTS engine has been successfully initialized.
 
                     }
+                    listener = getListener();
+                    textToSpeech.setOnUtteranceProgressListener(listener);
                 } else {
                     // Initialization failed.
                     Log.e("TTS", "Could not initialize TextToSpeech.");
                 }
             }
-        });
+        }
+
+        );
+
+
+    }
+
+    private UtteranceProgressListener getListener() {
+        return new UtteranceProgressListener() {
+            @Override
+            public void onStart(String utteranceId) {
+
+            }
+
+            @Override
+            public void onDone(String utteranceId) {
+                synchronized (this) {
+                    this.notify();
+                }
+            }
+
+            @Override
+            public void onError(String utteranceId) {
+
+            }
+        };
     }
 
     @Override
@@ -66,6 +96,7 @@ public class SpeechControllerImpl implements SpeechController {
 
     @Override
     public int speak(CharSequence text, int queueMode) {
+
         return speak(text,queueMode,null);
     }
 
@@ -76,7 +107,14 @@ public class SpeechControllerImpl implements SpeechController {
 
     @Override
     public int speak(CharSequence text, int queueMode, Bundle params, String utteranceId) {
-        return textToSpeech.speak(text,queueMode,params,utteranceId);
+        int result = textToSpeech.speak(text,queueMode,params,utteranceId);
+
+        synchronized (listener) {
+            try {
+                listener.wait(3000);
+            } catch (InterruptedException ex) {}
+        }
+        return result;
     }
 
     @Override
