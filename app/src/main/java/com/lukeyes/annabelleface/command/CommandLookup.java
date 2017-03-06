@@ -28,13 +28,15 @@ public class CommandLookup implements CommandReference {
             PauseCommand pause,
             PitchCommand pitch,
             SayCommand say,
-            RateCommand rate
+            RateCommand rate,
+            ViewCommand view
     ) {
         lookup.put("face", face);
         lookup.put("pause", pause);
         lookup.put("pitch", pitch);
         lookup.put("say", say);
         lookup.put("rate", rate);
+        lookup.put("view", view);
 
     }
 
