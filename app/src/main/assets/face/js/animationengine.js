@@ -174,7 +174,7 @@
 
             var mouth = 0.0;
             if (isTalking) {
-                mouth = sPlan.speakState();
+                mouth = 1.0;
             }
             if (lastMouth != mouth) {
                 faceController.setAnimationPositionForPart('mouth', mouth);
@@ -201,7 +201,7 @@
         });
 
         var processMessage = function (message) {
-            if (message.isTalking && message.isTalking != isTalking) {
+            if (message.isTalking != isTalking) {
                 sPlan.resetMouth();
             }
             isTalking = message.isTalking;

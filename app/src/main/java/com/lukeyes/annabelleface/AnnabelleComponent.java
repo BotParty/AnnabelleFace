@@ -22,7 +22,6 @@ import dagger.Component;
 public interface AnnabelleComponent {
   //  FullscreenActivity oontext();
     void inject(FullscreenActivity activity);
-
     void inject(CommandReference reference);
     void inject(CommandLookup lookup);
     void inject(FaceCommand face);
