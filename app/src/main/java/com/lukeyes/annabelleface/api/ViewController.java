@@ -12,5 +12,10 @@ import java.net.URL;
 
 public interface ViewController {
     void setImage(String image);
+
+    void setEyeState(String eyeState);
+
+    void talk(boolean talkOn);
+
     void setUri(String uriStr);
 }

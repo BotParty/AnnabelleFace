@@ -18,8 +18,8 @@ import android.widget.Toast;
 import static com.lukeyes.annabelleface.util.Helpers.*;
 
 import com.lukeyes.annabelleface.api.ViewController;
-import com.lukeyes.annabelleface.api.ViewControllerImpl;
 import com.lukeyes.annabelleface.command.ChatCommand;
+import com.lukeyes.annabelleface.command.SayCommand;
 import com.lukeyes.annabelleface.parser.ChatParser;
 
 import org.java_websocket.client.WebSocketClient;
@@ -145,10 +145,14 @@ public class FullscreenActivity extends BaseActivity {
         WebSettings webSettings = mContentView.getSettings();
         webSettings.setJavaScriptEnabled(true);
 
+        //init face animation
+        viewController.setUri("");
+
+
         //set the initial face state, if configured
-        String faceUri = getProperty("normal.faceURI", this);
-        if (faceUri != null && !faceUri.equals("")) {
-            viewController.setUri(faceUri);
+        String face = getProperty("normal.face", this);
+        if (face != null && !face.equals("")) {
+            viewController.setImage(face);
         }
 
         // Set up the user interaction to manually show or hide the system UI.
@@ -253,9 +257,12 @@ public class FullscreenActivity extends BaseActivity {
     }
 
     public void displayString(String message) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+
         try {
             for (ChatCommand command : chatParser.parse(message)) {
+                if (command instanceof SayCommand) {
+                    Toast.makeText(context, command.getParameterList()[0], Toast.LENGTH_SHORT).show();
+                }
                 command.execute();
             }
         } catch (Throwable ex) {}
@@ -282,7 +289,7 @@ public class FullscreenActivity extends BaseActivity {
                     public void run() {
                         connectButton.setEnabled(false);
                         disconnectButton.setEnabled(true);
-                        displayString("Opened");
+                        displayString("Anna bell ready for action meow");
                     }
                 });
 

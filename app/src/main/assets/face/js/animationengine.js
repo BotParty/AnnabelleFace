@@ -3,7 +3,7 @@
 (function () {
     'use strict';
     window.robotface.animationengine = {};
-
+    var BLINKTIME = 600.0;
     var setTimeout = window.setTimeout;
     var requestAnimationFrame = window.requestAnimationFrame;
     var ANIMATION_ENGINE = window.robotface.animationengine;
@@ -76,6 +76,85 @@
     ANIMATION_ENGINE.createDirectMessageAnimationEngine = function (faceController) {
         var currentEmotion = faceController.getFaceEmotion();
         var isTalking = false;
+        var eyeState = "BLINKING"; 
+
+        var randomBlink = function() {
+            var base = Math.random();
+            if (base < 0.25 || base > 0.75) {
+                return (base * 3000) + 
+                    ((base < 0.25) ? 2000 : 7000) ;   
+            } else {
+               return (base * 2000) + 3000;
+            }
+        }
+
+        var blinkVal = function(elapsed) {
+            //y=(x-0.5)^2/(0.25)
+            var x = elapsed / BLINKTIME;
+            return Math.min(Math.pow(x - 0.5,2) / 0.25, 1.0)
+        } 
+        var blinkPlan = function() {
+            var start; 
+            var nextBlink;
+            
+            var resetBlink =  function() {
+                start = 0;
+                nextBlink = Date.now() + randomBlink();
+            }
+
+            var blinkState = function() {
+                var now = Date.now();
+                if (now > nextBlink) { //reset
+                    start = now;
+                    nextBlink = now + randomBlink();
+                } 
+                return blinkVal(Date.now() - start);
+            };
+
+            
+            resetBlink();
+
+            return {
+                blinkState: blinkState,
+                resetBlink: resetBlink
+            }
+        };
+
+        var randomMouth = function () {
+            var base = Math.random();
+            return (base * 200) + 80;
+        }
+        var speakPlan = function () {
+            var nextToggle;
+            var isOpen;
+
+            var resetMouth =  function() {
+                isOpen = false;
+                nextToggle = Date.now() + randomMouth();
+            }
+
+            var speakState = function() {
+                var now = Date.now();
+                if (now > nextToggle) { 
+                    nextToggle = now + randomMouth();
+                    isOpen = !isOpen;
+                } 
+
+                return isOpen;
+            };
+
+            
+            resetMouth();
+
+            return {
+                resetMouth: resetMouth,
+                speakState: speakState
+            }
+        };
+        
+ 
+        var bPlan = blinkPlan();
+        var sPlan = speakPlan();
 
         faceController.setAnimationPositionForPart('mouth', 0.0);
         faceController.setAnimationPositionForPart('eyes', 0.0);
@@ -84,22 +163,55 @@
         // between each blink is an interval of 2–10 seconds; actual rates vary by individual averaging around 10 blinks per minute in a laboratory setting
         // source: https://en.wikipedia.org/wiki/blinking
 
+        var lastEmotion;
+        var lastMouth = 0.0;
+        var lastEye = 0.0;
         // For now no blinking and just talk when mouth open
         requestAnimationFrame(function processAnimations () {
-            faceController.setFaceEmotion(currentEmotion);
-
-            if (isTalking) {
-                faceController.setAnimationPositionForPart('mouth', 1);
-            } else {
-                faceController.setAnimationPositionForPart('mouth', 0);
+            if (!lastEmotion || currentEmotion !== lastEmotion) {
+                faceController.setFaceEmotion(currentEmotion);
             }
 
+            var mouth = 0.0;
+            if (isTalking) {
+                mouth = sPlan.speakState();
+            }
+            if (lastMouth != mouth) {
+                faceController.setAnimationPositionForPart('mouth', mouth);
+            } 
+
+            var actualEyeState = 1;
+
+            if (eyeState === "BLINKING") {
+                actualEyeState = bPlan.blinkState();
+            } else if (eyeState === "CLOSED") {
+                actualEyeState = 0.0;
+            } else if (eyeState === "MID") {
+                actualEyeState = 0.5;
+            }
+
+            if (lastEye != actualEyeState) {
+                 faceController.setAnimationPositionForPart('eyes', actualEyeState);
+            }
+           
+            lastEye = actualEyeState;
+            lastMouth = mouth;
+            lastEmotion = currentEmotion;
             requestAnimationFrame(processAnimations);
         });
 
         var processMessage = function (message) {
+            if (message.isTalking && message.isTalking != isTalking) {
+                sPlan.resetMouth();
+            }
             isTalking = message.isTalking;
             currentEmotion = message.emotion;
+            if (message.eyeState && message.eyeState !== eyeState) {
+                eyeState = message.eyeState;
+                if (eyeState === "BLINKING") {
+                    bPlan.resetBlink();
+                }
+            }
         };
 
         return {

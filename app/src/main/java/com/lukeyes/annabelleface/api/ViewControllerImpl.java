@@ -8,17 +8,33 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Created by brandon on 2/25/2017.
  */
 
+@Singleton
 public class ViewControllerImpl implements ViewController {
 
     private FullscreenActivity _activity;
-    private final String BASE_FACE_URL = "file:///android_asset/face/";
-    private final String FACE_URI = "index.html?face=%s";
+    private final String BASEURL = "file:///android_asset/face/index.html?showtime=&localstate=";
+    private final String FACECTRL = "javascript:window.robotface.connectionmanager.setLocalState(" +
+                                        "{emotion: '%s', eyeState: '%s', isTalking: %s}); ";
 
+
+    private  String _currentEmotion;
+    private  boolean _isTalking;
+    private  String _eyeState;
+
+    private void updateView() {
+        _activity.getWebView().post(new Runnable() {
+            @Override
+            public void run() {
+                _activity.getWebView().loadUrl(String.format(FACECTRL,_currentEmotion,_eyeState,_isTalking));
+            }
+        });
+    }
 
     @Inject
     public ViewControllerImpl(FullscreenActivity activity) {
@@ -27,18 +43,31 @@ public class ViewControllerImpl implements ViewController {
 
     @Override
     public void setImage(String image) {
+        _currentEmotion = image;
+        updateView();
+    }
 
-        _activity.getWebView().loadUrl(String.format(FACE_URI,image));
+    @Override
+    public void setEyeState(String eyeState) {
+        _eyeState = eyeState;
+        updateView();
+    }
+
+    @Override
+    public void talk(boolean talkOn) {
+        _isTalking = talkOn;
+        updateView();
     }
 
     @Override
     public void setUri(String uriStr) {
         URL url;
         try {
+            if (uriStr == null || uriStr.equals("")) {
+                uriStr = BASEURL;
+            }
             URI uri = new URI(uriStr);
-            if (!uri.isAbsolute()) {
-                url = new URL(new URL(BASE_FACE_URL), uri.toString());
-            } else url = uri.toURL();
+            url = uri.toURL();
         }
         catch (MalformedURLException | URISyntaxException ex) {
             ex.printStackTrace();

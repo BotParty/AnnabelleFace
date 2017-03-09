@@ -7,22 +7,29 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
+import android.view.View;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Created by brandon on 2/12/2017.
  */
 
+@Singleton
 public class SpeechControllerImpl implements SpeechController {
 
 
     private TextToSpeech textToSpeech;
-    private UtteranceProgressListener listener;
+    private final UtteranceProgressListener _listener;
 
-    public SpeechControllerImpl(Context context ) {
+    @Inject
+    public SpeechControllerImpl(Context context, ViewController view ) {
+        _listener = getListener(view);
         textToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -44,12 +51,13 @@ public class SpeechControllerImpl implements SpeechController {
                         // The TTS engine has been successfully initialized.
 
                     }
-                    listener = getListener();
-                    textToSpeech.setOnUtteranceProgressListener(listener);
                 } else {
                     // Initialization failed.
                     Log.e("TTS", "Could not initialize TextToSpeech.");
                 }
+
+                textToSpeech.setOnUtteranceProgressListener(_listener);
+
             }
         }
 
@@ -58,23 +66,33 @@ public class SpeechControllerImpl implements SpeechController {
 
     }
 
-    private UtteranceProgressListener getListener() {
+    private UtteranceProgressListener getListener(final ViewController view) {
         return new UtteranceProgressListener() {
             @Override
             public void onStart(String utteranceId) {
+                view.talk(true);
+            }
 
+            @Override
+            public void onBeginSynthesis(String utteranceId,
+                                         int sampleRateInHz,
+                                         int audioFormat,
+                                         int channelCount) {
+                view.talk(true);
             }
 
             @Override
             public void onDone(String utteranceId) {
+                view.talk(false);
                 synchronized (this) {
                     this.notify();
                 }
+
             }
 
             @Override
             public void onError(String utteranceId) {
-
+                view.talk(false);
             }
         };
     }
@@ -107,11 +125,13 @@ public class SpeechControllerImpl implements SpeechController {
 
     @Override
     public int speak(CharSequence text, int queueMode, Bundle params, String utteranceId) {
+
+
         int result = textToSpeech.speak(text,queueMode,params,utteranceId);
 
-        synchronized (listener) {
+        synchronized (_listener) {
             try {
-                listener.wait(3000);
+                _listener.wait(3000);
             } catch (InterruptedException ex) {}
         }
         return result;

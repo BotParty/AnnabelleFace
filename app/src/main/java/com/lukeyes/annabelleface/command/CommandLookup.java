@@ -29,7 +29,8 @@ public class CommandLookup implements CommandReference {
             PitchCommand pitch,
             SayCommand say,
             RateCommand rate,
-            ViewCommand view
+            ViewCommand view,
+            EyeCommand eye
     ) {
         lookup.put("face", face);
         lookup.put("pause", pause);
@@ -37,6 +38,7 @@ public class CommandLookup implements CommandReference {
         lookup.put("say", say);
         lookup.put("rate", rate);
         lookup.put("view", view);
+        lookup.put("eye", eye);
 
     }
 
