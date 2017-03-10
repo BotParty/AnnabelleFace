@@ -17,6 +17,6 @@ public class EyeCommand extends ChatCommandBase {
 
     @Override
     public void execute(String... parameters) {
-        _controller.setEyeState(parameters[0]);
+        _controller.setEyeState(parameters[0].toUpperCase());
     }
 }

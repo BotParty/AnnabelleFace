@@ -166,17 +166,22 @@
         var lastEmotion;
         var lastMouth = 0.0;
         var lastEye = 0.0;
-        // For now no blinking and just talk when mouth open
+
         requestAnimationFrame(function processAnimations () {
+
+            var animationUpdate = false;
+
             if (!lastEmotion || currentEmotion !== lastEmotion) {
+                animationUpdate = true;
                 faceController.setFaceEmotion(currentEmotion);
             }
 
             var mouth = 0.0;
             if (isTalking) {
-                mouth = 1.0;
+                mouth = sPlan.speakState();
             }
             if (lastMouth != mouth) {
+                animationUpdate = true;
                 faceController.setAnimationPositionForPart('mouth', mouth);
             } 
 
@@ -191,13 +196,18 @@
             }
 
             if (lastEye != actualEyeState) {
+                 animationUpdate = true;
                  faceController.setAnimationPositionForPart('eyes', actualEyeState);
             }
            
             lastEye = actualEyeState;
             lastMouth = mouth;
             lastEmotion = currentEmotion;
-            requestAnimationFrame(processAnimations);
+            if (!animationUpdate) {
+                setTimeout(processAnimations,50);
+            } else {
+                requestAnimationFrame(processAnimations);
+            }
         });
 
         var processMessage = function (message) {

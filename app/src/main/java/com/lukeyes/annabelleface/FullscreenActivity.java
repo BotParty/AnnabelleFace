@@ -2,6 +2,7 @@ package com.lukeyes.annabelleface;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,6 +20,7 @@ import static com.lukeyes.annabelleface.util.Helpers.*;
 
 import com.lukeyes.annabelleface.api.ViewController;
 import com.lukeyes.annabelleface.command.ChatCommand;
+import com.lukeyes.annabelleface.command.ChatCommandBase;
 import com.lukeyes.annabelleface.command.SayCommand;
 import com.lukeyes.annabelleface.parser.ChatParser;
 
@@ -256,16 +258,32 @@ public class FullscreenActivity extends BaseActivity {
         });
     }
 
-    public void displayString(String message) {
+    class AsyncCommandTask extends AsyncTask<ChatCommand, Void, Void>{
+
+        @Override
+        protected Void doInBackground(ChatCommand... params) {
+            for(ChatCommand cc : params) {
+                cc.execute();
+            }
+            return null;
+        }
+    }
+
+    public void parseMessage(String message) {
 
         try {
+            boolean firstTask = true;
             for (ChatCommand command : chatParser.parse(message)) {
-                if (command instanceof SayCommand) {
-                    Toast.makeText(context, command.getParameterList()[0], Toast.LENGTH_SHORT).show();
+                if (firstTask) {
+                    firstTask = false;
+                    new AsyncCommandTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, command);
+                } else {
+                    new AsyncCommandTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, command);
                 }
-                command.execute();
             }
-        } catch (Throwable ex) {}
+        } catch (Throwable ex) {
+            Log.e("task fail","something went wrong",ex);
+        }
     }
 
     private void connectWebSocket(String address, String port) {
@@ -289,7 +307,7 @@ public class FullscreenActivity extends BaseActivity {
                     public void run() {
                         connectButton.setEnabled(false);
                         disconnectButton.setEnabled(true);
-                        displayString("Anna bell ready for action meow");
+                        parseMessage("Anna bell ready for action meow");
                     }
                 });
 
@@ -303,7 +321,7 @@ public class FullscreenActivity extends BaseActivity {
                     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
                     @Override
                     public void run() {
-                        displayString(message);
+                        parseMessage(message);
                     }
                 });
             }
