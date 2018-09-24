@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
-import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,15 +15,19 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import static org.botparty.annabelle.util.Helpers.*;
 
 import org.botparty.annabelle.api.ViewController;
 import org.botparty.annabelle.command.ChatCommand;
+import org.botparty.annabelle.domain.CommunicationData;
 import org.botparty.annabelle.parser.ChatParser;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -74,7 +77,7 @@ public class FullscreenActivity extends BaseActivity {
         @Override
         public void run() {
             // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
+            android.support.v7.app.ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
                 actionBar.show();
             }
@@ -200,7 +203,7 @@ public class FullscreenActivity extends BaseActivity {
 
     private void hide() {
         // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
+        android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
         }
@@ -269,9 +272,24 @@ public class FullscreenActivity extends BaseActivity {
 
     public void parseMessage(String message) {
 
+        ObjectMapper mapper = new ObjectMapper();
+        CommunicationData data = null;
+        try {
+            data = mapper.readValue(message, CommunicationData.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        if(!"face".equals(data.getRecipient())) {
+            return;
+        }
+
+        String sentMessage = data.getMessage();
+
         try {
             boolean firstTask = true;
-            for (ChatCommand command : chatParser.parse(message)) {
+            for (ChatCommand command : chatParser.parse(sentMessage)) {
                 if (firstTask) {
                     firstTask = false;
                     new AsyncCommandTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, command);
